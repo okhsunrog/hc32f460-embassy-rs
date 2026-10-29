@@ -16,6 +16,10 @@ targets = ["thumbv7em-none-eabihf"]
 default = ["time-driver"]
 # Link the HAL's millisecond SysTick driver; disable to use a board time driver.
 time-driver = ["dep:embassy-time-driver", "dep:embassy-time-queue-utils", "embassy-time/tick-hz-1_000"]
+# Free-running TimerA1 + compare alarms. Disable defaults; the application picks
+# embassy-time/tick-hz-* independently of the peripheral's physical count rate.
+# Takes precedence over the legacy backend when building --all-features.
+time-driver-tmra = ["dep:embassy-time-driver", "dep:embassy-time-queue-utils"]
 # Export the PAC vectors for cortex-m-rt applications.
 rt = ["hc32f460-pac/rt"]
 # Optional critical-section implementation for single-core Cortex-M boards.

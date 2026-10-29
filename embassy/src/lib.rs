@@ -19,7 +19,10 @@ pub mod i2c;
 pub mod intc;
 pub mod pwm;
 pub mod spi;
-#[cfg(feature = "time-driver")]
+#[cfg(all(feature = "time-driver", not(feature = "time-driver-tmra")))]
+pub mod time_driver;
+#[cfg(feature = "time-driver-tmra")]
+#[path = "time_driver_tmra.rs"]
 pub mod time_driver;
 pub mod usart;
 
@@ -35,7 +38,7 @@ pub mod usart;
 /// # Safety
 /// Call once at startup, before other drivers run. The caller must exclusively
 /// own SysTick and supply the configured CPU clock in `clocks.hclk`.
-#[cfg(feature = "time-driver")]
+#[cfg(all(feature = "time-driver", not(feature = "time-driver-tmra")))]
 pub unsafe fn init(clocks: clocks::Clocks) {
     // SAFETY: The caller transfers exclusive SysTick ownership to the driver.
     let systick = unsafe { cortex_m::Peripherals::steal() }.SYST;

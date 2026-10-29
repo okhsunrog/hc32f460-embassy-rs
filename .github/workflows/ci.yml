@@ -19,6 +19,8 @@ jobs:
       - run: cargo fmt --all -- --check
       - run: cargo clippy --workspace --locked --all-targets --features embassy-hc32/rt -- -D warnings
       - run: cargo test -p embassy-hc32 --locked --lib
+      - run: cargo test -p embassy-hc32 --locked --lib --no-default-features --features time-driver-tmra,embassy-time/tick-hz-32_768
+      - run: cargo clippy -p embassy-hc32 --locked --all-targets --no-default-features --features time-driver-tmra,embassy-time/tick-hz-32_768 -- -D warnings
       - run: cargo test -p embassy-hc32 --locked --lib --features i2c-rx-poll-diagnostic i2c::tests
       - run: cargo test -p embassy-hc32 --locked --doc
       - run: cargo doc -p embassy-hc32 --locked --no-deps
@@ -36,6 +38,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo check --workspace --locked --target thumbv7em-none-eabihf
       - run: cargo check -p embassy-hc32 --locked --no-default-features --target thumbv7em-none-eabihf
+      - run: cargo check -p embassy-hc32 --locked --no-default-features --features time-driver-tmra,rt,embassy-time/tick-hz-32_768 --target thumbv7em-none-eabihf
       - run: cargo check -p embassy-hc32 --locked --example uart --features rt --target thumbv7em-none-eabihf
       - run: cargo clippy --workspace --locked --all-features --target thumbv7em-none-eabihf -- -D warnings
       - run: cargo build --workspace --locked --release --all-features --target thumbv7em-none-eabihf

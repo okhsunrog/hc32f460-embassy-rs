@@ -84,6 +84,25 @@ embassy-hc32 = { path = "path/to/embassy", features = ["rt", "critical-section-s
   the actual HCLK to `time_driver::init`; forward the SysTick exception to
   `time_driver::systick_tick`. Initialization is fallible and once-only. Disable
   default features to use a board-provided Embassy time driver/tick frequency.
+
+- `time-driver-tmra` selects the free-running TimerA1 backend instead. Disable
+  defaults and select the logical `embassy-time/tick-hz-*` in the application;
+  32,768 Hz is supported independently of the timer's PCLK1-derived count rate.
+  Unsafe `time_driver::init` consumes TimerA1, takes PCLK1 Hz, two exclusive
+  `intc::Line`s for overflow/comparison and their priority. Install both vectors
+  to call `time_driver::on_interrupt`. No pin output, SysTick or DWT is used.
+  The complete timer is reserved, including its compare/buffer/trigger controls.
+  The prescaler is the largest power of two up to /256 that still resolves the
+  logical tick rate. With PCLK1=96 MHz and logical 32,768 Hz, hardware counts at
+  375 kHz and wraps every 174.763 ms. Service before an entire wrap is missed;
+  keep PCLK1 running/unchanged. Software extends the counter to 64-bit logical
+  time, preserving fractional conversion remainder. Compare programs the nearest
+  deadline, with a post-write late check; distant deadlines are reconsidered at
+  overflow. Expired wakers run through the 16-entry queue. `diagnostics()` reports
+  time, counter rate and IRQ/wrap counts. Host models cover overflow/read races,
+  delayed compare writes, independent deadlines and exact fractional conversion;
+  board acceptance remains separate. If both backend features are enabled,
+  TimerA wins and the legacy feature's 1 kHz logical setting remains in effect.
 - `rt` exports PAC vector support, including `pac::interrupt` attributes.
 - `critical-section-single-core` supplies Cortex-M critical sections. Omit it
   when the board/RTOS provides its own implementation; link exactly one.
